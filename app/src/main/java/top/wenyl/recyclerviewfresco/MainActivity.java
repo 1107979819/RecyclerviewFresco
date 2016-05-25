@@ -25,14 +25,14 @@ public class MainActivity extends Activity {
     public static final String DOMAIN = "http://dn-assets-gitcafe-com.qbox.me";
     private static final String BASE_DIR = "Kaedea/Kaede-Assets/raw/gitcafe-pages/image";
     List<String> datas;
-    MyAdapter adapter;
+    //    MyAdapter adapter;
     SmartRecyclerAdapter smartRecyclerAdapter;
     private PtrFrameLayout mPtrFrameLayout;
     RecyclerView recyclerView;
     private CardView headerView, footerView;
 
-//    StaggeredGridLayoutManager layoutManager;
-     LinearLayoutManager  layoutManager;
+    //    StaggeredGridLayoutManager layoutManager;
+    LinearLayoutManager  layoutManager;
     boolean isLoading;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,18 +46,18 @@ public class MainActivity extends Activity {
 
         //init
 //        layoutManager  = new StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL);
+        smartRecyclerAdapter = new SmartRecyclerAdapter();
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new MyAdapter(0);
         initHeadAndFooterView();
-        showLine();
+        recyclerView.setAdapter(smartRecyclerAdapter);
 //        recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(false);
         datas = new ImageHolder(DOMAIN, BASE_DIR, "jk", "jk-", ".jpg", 30, "00").getUrls();
 
 
-        adapter.setDatas(datas);
+        smartRecyclerAdapter.setDatas(datas);
 
         //下拉加载刷新
         mPtrFrameLayout = (PtrFrameLayout) findViewById(R.id.load_more_list_view_ptr_frame);
@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         datas.add(0, "http://t12.baidu.com/it/u=2784785666,765219454&fm=58");
-                        adapter.updateDatas(datas);
+                        smartRecyclerAdapter.updateDatas(datas);
 
                         mPtrFrameLayout.refreshComplete();//刷新完成
 
@@ -124,7 +124,7 @@ public class MainActivity extends Activity {
                 Log.d("test", "onScrolled");
 
                 int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                if (lastVisibleItemPosition + 4 == adapter.getItemCount()) {
+                if (lastVisibleItemPosition + 4 == smartRecyclerAdapter.getItemCount()) {
                     Log.d("test", "loading executed");
 
 //                    boolean isRefreshing = swipeRefreshLayout.isRefreshing();
@@ -132,7 +132,7 @@ public class MainActivity extends Activity {
 //                        adapter.notifyItemRemoved(adapter.getItemCount());
 //                        return;
 //                    }
-                if (!isLoading) {
+                    if (!isLoading) {
                         isLoading = true;
                         Log.i("Test","加载更多");
 //                        handler.postDelayed(new Runnable() {
@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
 //                                isLoading = false;
 //                            }
 //                        }, 1000);
-//                    smartRecyclerAdapter.setFooterView(footerView);
+                    smartRecyclerAdapter.setFooterView(footerView);
                         recyclerView.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -154,10 +154,9 @@ public class MainActivity extends Activity {
                                 {
                                     datas.add(s+i,"http://t12.baidu.com/it/u=2784785666,765219454&fm=58");
                                 }
-                                adapter.updateDatas(datas);
+                                smartRecyclerAdapter.updateDatas(datas);
                                 isLoading = false;
-//                                smartRecyclerAdapter.removeFooterView();
-                                Log.i("Test","ttttttt");
+                                smartRecyclerAdapter.removeFooterView();
                             }
                         }, 2000);
 
@@ -167,7 +166,7 @@ public class MainActivity extends Activity {
         });
     }
 
-   private void initHeadAndFooterView() {
+    private void initHeadAndFooterView() {
         //header view
         RecyclerView.LayoutParams layoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 400);
         layoutParams.setMargins(10, 10, 10, 10);
@@ -195,14 +194,14 @@ public class MainActivity extends Activity {
 
     }
 
-    private void showLine() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        smartRecyclerAdapter = new SmartRecyclerAdapter(adapter);
-//        smartRecyclerAdapter.setFooterView(footerView);
-//        smartRecyclerAdapter.setHeaderView(headerView);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(smartRecyclerAdapter);
-    }
+//    private void showLine() {
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+//        smartRecyclerAdapter = new SmartRecyclerAdapter(adapter);
+////        smartRecyclerAdapter.setFooterView(footerView);
+////        smartRecyclerAdapter.setHeaderView(headerView);
+//        recyclerView.setLayoutManager(linearLayoutManager);
+//        recyclerView.setAdapter(smartRecyclerAdapter);
+//    }
     /*private void showStagger() {
         Toast.makeText(this, "StaggeredGridLayoutManager", Toast.LENGTH_SHORT).show();
         setTitle("StaggeredGridLayoutManager");
