@@ -1,14 +1,18 @@
 package top.wenyl.recyclerviewfresco;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +26,11 @@ public class MainActivity extends Activity {
     private static final String BASE_DIR = "Kaedea/Kaede-Assets/raw/gitcafe-pages/image";
     List<String> datas;
     MyAdapter adapter;
+    SmartRecyclerAdapter smartRecyclerAdapter;
     private PtrFrameLayout mPtrFrameLayout;
-    LinearLayout linearLayout;
     RecyclerView recyclerView;
+    private CardView headerView, footerView;
+
 //    StaggeredGridLayoutManager layoutManager;
      LinearLayoutManager  layoutManager;
     boolean isLoading;
@@ -35,19 +41,20 @@ public class MainActivity extends Activity {
 
 //
     }
-    public void init()
-    {
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerview);
-        linearLayout = (LinearLayout)findViewById(R.id.ll_con);
+    public void init() {
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+
         //init
 //        layoutManager  = new StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL);
-    layoutManager = new LinearLayoutManager(this);
+        layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setLayoutManager(layoutManager);
-        adapter= new MyAdapter(0);
-        recyclerView.setAdapter(adapter);
+        adapter = new MyAdapter(0);
+        initHeadAndFooterView();
+        showLine();
+//        recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(false);
-        datas = new ImageHolder(DOMAIN, BASE_DIR,"jk","jk-",".jpg",30,"00").getUrls();
+        datas = new ImageHolder(DOMAIN, BASE_DIR, "jk", "jk-", ".jpg", 30, "00").getUrls();
 
 
         adapter.setDatas(datas);
@@ -60,20 +67,23 @@ public class MainActivity extends Activity {
             public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
 
                 // here check list view, not content.
-                return PtrDefaultHandler.checkContentCanBePulledDown(frame,linearLayout, header);
+                return PtrDefaultHandler.checkContentCanBePulledDown(frame, recyclerView, header);
             }
 
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                    Log.i("Test","加載更多");
-
+                Log.i("Test", "加載更多");
+                smartRecyclerAdapter.setHeaderView(headerView);
                 frame.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        datas.add(0,"http://t12.baidu.com/it/u=2784785666,765219454&fm=58");
+                        datas.add(0, "http://t12.baidu.com/it/u=2784785666,765219454&fm=58");
                         adapter.updateDatas(datas);
 
                         mPtrFrameLayout.refreshComplete();//刷新完成
+
+                        smartRecyclerAdapter.removeHeaderView();
+
                     }
                 }, 1800);
             }
@@ -122,7 +132,7 @@ public class MainActivity extends Activity {
 //                        adapter.notifyItemRemoved(adapter.getItemCount());
 //                        return;
 //                    }
-                 /*   if (!isLoading) {
+                if (!isLoading) {
                         isLoading = true;
                         Log.i("Test","加载更多");
 //                        handler.postDelayed(new Runnable() {
@@ -133,6 +143,7 @@ public class MainActivity extends Activity {
 //                                isLoading = false;
 //                            }
 //                        }, 1000);
+//                    smartRecyclerAdapter.setFooterView(footerView);
                         recyclerView.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -145,16 +156,63 @@ public class MainActivity extends Activity {
                                 }
                                 adapter.updateDatas(datas);
                                 isLoading = false;
-
+//                                smartRecyclerAdapter.removeFooterView();
+                                Log.i("Test","ttttttt");
                             }
-                        }, 1000);
+                        }, 2000);
 
-                    }*/
+                    }
                 }
             }
         });
+    }
 
+   private void initHeadAndFooterView() {
+        //header view
+        RecyclerView.LayoutParams layoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 400);
+        layoutParams.setMargins(10, 10, 10, 10);
+
+        headerView = new CardView(this);
+        headerView.setLayoutParams(layoutParams);
+        TextView head = new TextView(this);
+        head.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        head.setBackgroundColor(Color.BLUE);
+        head.setTextColor(Color.WHITE);
+        head.setGravity(Gravity.CENTER);
+        head.setText("THIS IS HEADER VIEW");
+        headerView.addView(head);
+
+        //footer view
+        footerView = new CardView(this);
+        footerView.setLayoutParams(layoutParams);
+        TextView footer = new TextView(this);
+        footer.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        footer.setBackgroundColor(Color.RED);
+        footer.setText("THIS IS FOOTER VIEW");
+        footer.setGravity(Gravity.CENTER);
+        footer.setTextColor(Color.WHITE);
+        footerView.addView(footer);
 
     }
+
+    private void showLine() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        smartRecyclerAdapter = new SmartRecyclerAdapter(adapter);
+//        smartRecyclerAdapter.setFooterView(footerView);
+//        smartRecyclerAdapter.setHeaderView(headerView);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(smartRecyclerAdapter);
+    }
+    /*private void showStagger() {
+        Toast.makeText(this, "StaggeredGridLayoutManager", Toast.LENGTH_SHORT).show();
+        setTitle("StaggeredGridLayoutManager");
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(4, StaggeredGridLayoutManager.VERTICAL);
+        SmartRecyclerAdapter smartRecyclerAdapter = new SmartRecyclerAdapter(adapter);
+        smartRecyclerAdapter.setFooterView(footerView);
+        smartRecyclerAdapter.setHeaderView(headerView);
+        recyclerView.setLayoutManager(staggeredGridLayoutManager);
+        recyclerView.setAdapter(smartRecyclerAdapter);
+    }*/
+
 
 }
